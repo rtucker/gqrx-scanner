@@ -53,7 +53,7 @@ class NetRig(object):
 
 
 def set_title(text):
-    sys.stdout.write("\x1B]0;%s\x07" % (text, GQRX_IP_ADDRESS))
+    sys.stdout.write("\x1B]0;%s\x07" % text)
     sys.stdout.flush()
 
 
