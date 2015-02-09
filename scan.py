@@ -3,26 +3,58 @@
 GQRX_IP_ADDRESS = "127.0.0.1:7356"
 
 FREQLIST = [
-    # frequency, threshold, description
-    (461.7125e6, -70, "RochRad 01"),
-    (462.0375e6, -70, "RochRad 02"),
-    (463.2375e6, -70, "RochRad 03"),
-    (464.5875e6, -70, "RochRad 04"),
-    (462.0875e6, -70, "RochRad 05"),
-    (461.4125e6, -70, "RochRad 06"),
-    (461.8375e6, -70, "RochRad 07"),
-    (463.7875e6, -70, "RochRad 08"),
-    (461.5000e6, -70, "FlwrCty 01"),
-    (463.9500e6, -70, "FlwrCty 02"),
-    (464.1750e6, -70, "FlwrCty 03"),
-    (461.1500e6, -70, "FlwrCty 05"),
-    (461.2750e6, -70, "FlwrCty 06"),
-    (453.6750e6, -70, "MCC-B BldgSv"),
-    (453.2000e6, -70, "MCC-B Safety"),
-    (444.4000e6, -70, "W2RFC Repeater"),
-    (463.4125e6, -70, "RIT Crew 1"),
-    (468.4125e6, -70, "RIT Crew 2"),
-    (864.2125e6, -60, "RIT Dispatch"),
+    # weight, frequency, threshold, description
+    (1, 462.5625e6, -70, "FRS 1"),
+    (1, 462.5875e6, -70, "FRS 2"),
+    (1, 462.6125e6, -70, "FRS 3"),
+    (1, 462.6375e6, -70, "FRS 4"),
+    (1, 462.6625e6, -70, "FRS 5"),
+    (1, 462.6875e6, -70, "FRS 6"),
+    (1, 462.7125e6, -70, "FRS 7"),
+    (1, 467.5625e6, -70, "FRS 8"),
+    (1, 467.5875e6, -70, "FRS 9"),
+    (1, 467.6125e6, -70, "FRS 10"),
+    (1, 467.6375e6, -70, "FRS 11"),
+    (1, 467.6625e6, -70, "FRS 12"),
+    (1, 467.6875e6, -70, "FRS 13"),
+    (1, 467.7125e6, -70, "FRS 14"),
+    (1, 462.5500e6, -70, "GMRS 1"),
+    (1, 462.5750e6, -70, "GMRS 2"),
+    (1, 462.6000e6, -70, "GMRS 3"),
+    (1, 462.6250e6, -70, "GMRS 4"),
+    (1, 462.6500e6, -70, "GMRS 5"),
+    (1, 462.6750e6, -70, "GMRS 6"),
+    (1, 462.7000e6, -70, "GMRS 7"),
+    (1, 462.7250e6, -70, "GMRS 8"),
+    (1, 467.5500e6, -70, "GMRS 1 in"),
+    (1, 467.5750e6, -70, "GMRS 2 in"),
+    (1, 467.6000e6, -70, "GMRS 3 in"),
+    (1, 467.6250e6, -70, "GMRS 4 in"),
+    (1, 467.6500e6, -70, "GMRS 5 in"),
+    (1, 467.6750e6, -70, "GMRS 6 in"),
+    (1, 467.7000e6, -70, "GMRS 7 in"),
+    (1, 467.7250e6, -70, "GMRS 8 in"),
+    (3, 461.7125e6, -70, "RochRad 01"),
+    (3, 462.0375e6, -70, "RochRad 02"),
+    (7, 463.2375e6, -70, "RochRad 03"),
+    (7, 464.5875e6, -70, "RochRad 04"),
+    (3, 462.0875e6, -70, "RochRad 05"),
+    (3, 461.4125e6, -70, "RochRad 06"),
+    (3, 461.8375e6, -70, "RochRad 07"),
+    (3, 463.7875e6, -70, "RochRad 08"),
+    (2, 461.5000e6, -70, "FlwrCty 01"),
+    (2, 463.9500e6, -70, "FlwrCty 02"),
+    (2, 464.1750e6, -70, "FlwrCty 03"),
+    (2, 461.1500e6, -70, "FlwrCty 05"),
+    (2, 461.2750e6, -70, "FlwrCty 06"),
+    (1, 452.9375e6, -70, "Rail ETD Engine"),
+    (1, 457.9375e6, -70, "Rail ETD Train"),
+    (1, 453.6750e6, -70, "MCC-B BldgSv"),
+    (1, 453.2000e6, -70, "MCC-B Safety"),
+    (1, 444.4000e6, -70, "W2RFC Repeater"),
+    (1, 463.4125e6, -70, "RIT Crew 1"),
+    (1, 468.4125e6, -70, "RIT Crew 2"),
+    (0, 864.2125e6, -60, "RIT Dispatch"),
 ]
 
 import Hamlib
@@ -72,14 +104,21 @@ def main():
 
         window_title_stale = True
 
+        # Run through the master frequency list and apply the weightings
+        freqs = []
+        for weight, freq, threshold, chname in FREQLIST:
+            while weight > 0:
+                freqs.append((freq, threshold, chname))
+                weight -= 1
+
         # Main loop.
         while True:
 
             # Shuffle the frequency list: mixes things up a bit, and also
             # helps minimize VCO retunes, oddly enough
-            random.shuffle(FREQLIST)
+            random.shuffle(freqs)
 
-            for freq, threshold, chname in FREQLIST:
+            for freq, threshold, chname in freqs:
                 # Clear the status line
                 sys.stdout.write('\r' + ' '*80)
                 # Change our frequency then wait a bit
